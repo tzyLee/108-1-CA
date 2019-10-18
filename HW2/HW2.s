@@ -92,22 +92,6 @@
 	fill_row_for_end:
 	# $t0 ~ $t4 can be used, $t5, $t6, $t7 is in use
 
-# Print score TODO
-		la      $a0, score
-		move    $a1, $s1
-		move 	$a2, $s0
-		addi    $a1, $a1, 1
-		addi    $a2, $a2, 1
-		jal     print_2d
-
-# Print dir TODO
-		la      $a0, dir
-		move    $a1, $s1
-		move 	$a2, $s0
-		addi    $a1, $a1, 1
-		addi    $a2, $a2, 1
-		jal     print_2d
-
 # Print maximum
 		la      $a0, str1
 		li      $v0, 4
@@ -123,79 +107,21 @@
 		la      $a0, str2
 		li      $v0, 4
 		syscall                            # puts("Traceback result:\n");
-		lw      $t0, 0($t7)                 # int $t0 = *max_pos;    // $t0 = $t6, $t0 stores the direction on dir[i][j]
+		lw      $t0, 0($t7)                # int $t0 = *max_pos;    // $t0 = $t6, $t0 stores the direction on dir[i][j]
 	backtrace_while:
-		beq     $t0, $zero, backtrace_end   # while ($t0 != 0) {
-		move    $a0, $t0                    #   $a0 = $t0;
+		beq     $t0, $zero, backtrace_end  # while ($t0 != 0) {
+		move    $a0, $t0                   #   $a0 = $t0;
 		li      $v0, 1
-		syscall                             #   print("%d", dir[i][j]);
-		addi    $t7, $t7, -4                #   max_pos -= sizeof(int);
-		beq     $t0, 1, update              #   if ($t0 != 1) {
-		sub     $t7, $t7, $t5               #     max_pos -= seq1.length() * sizeof(int);
-		beq     $t0, 2, update              #     if ($t0 != 2)
-		addi    $t7, $t7, -4                #       max_pos -= sizeof(int);
-	update:									#   }
-		lw      $t0, 0($t7)                 #   $t0 = *max_pos;
-		j       backtrace_while             # }
+		syscall                            #   print("%d", dir[i][j]);
+		addi    $t7, $t7, -4               #   max_pos -= sizeof(int);
+		beq     $t0, 1, update             #   if ($t0 != 1) {
+		sub     $t7, $t7, $t5              #     max_pos -= seq1.length() * sizeof(int);
+		beq     $t0, 2, update             #     if ($t0 != 2)
+		addi    $t7, $t7, -4               #       max_pos -= sizeof(int);
+	update:                                #   }
+		lw      $t0, 0($t7)                #   $t0 = *max_pos;
+		j       backtrace_while            # }
 	backtrace_end:
 # Exit
 		li      $v0, 10
 		syscall
-
-# Print a 2D array of int
-	print_2d:
-		# $a0: the array to print
-		# $a1: array.shape[0]
-		# $a2: array.shape[1]
-		addi    $sp, $sp, -28
-		sw      $ra, 0($sp)
-		sw      $a0, 4($sp)
-		sw      $a1, 8($sp)
-		sw      $a2, 12($sp)
-		sw      $s0, 16($sp)
-		sw      $s1, 20($sp)
-		sw      $s2, 24($sp)
-	
-		move    $s2, $a0
-		move    $s0, $zero                  # int i = 0 ($s0);
-	print_col_for:
-		bge     $s0, $a1, print_col_for_end # while ($s0 < $a1) {   // i < array.shape[0]
-		move    $s1, $zero                  #   int j = 0 ($s1);
-	print_row_for:
-		bge     $s1, $a2, print_row_for_end #   while ($s1 < $a2) { // j < array.shape[1]
-		lw      $a0, 0($s2)                 #     $a0 = *arr;
-		li      $v0, 1
-		syscall                             #     print("%d", arr[i][j]);
-		la      $a0, tab
-		li      $v0, 4
-		syscall                             #     print("\t");
-		# Restore
-		lw      $a2, 12($sp)
-
-		addi    $s2, $s2, 4                 #     arr += sizeof(int);
-		addi    $s1, $s1, 1                 #     ++$s1;             // ++j;
-		j       print_row_for               #   }
-	print_row_for_end:
-		la      $a0, nextline
-		li      $v0, 4
-		syscall                             #   print("\n")
-		# Restore
-		lw      $a2, 12($sp)
-		lw      $a1, 8($sp)
-
-		addi    $s0, $s0, 1                 #   ++$s0;               // ++i;
-		j       print_col_for               # }
-	print_col_for_end:
-		la      $a0, nextline
-		li      $v0, 4
-		syscall                             #   print("\n")
-
-		lw      $s2, 24($sp)
-		lw      $s1, 20($sp)
-		lw      $s0, 16($sp)
-		lw      $a2, 12($sp)
-		lw      $a1, 8($sp)
-		lw      $a0, 4($sp)
-		lw      $ra, 0($sp)
-		addi $sp, $sp, 28
-		jr      $ra
