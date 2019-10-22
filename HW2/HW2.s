@@ -99,6 +99,9 @@
 		move    $a0, $t6
 		li      $v0, 1
 		syscall                            # printf("%d", max);
+		la      $a0, nextline
+		li      $v0, 4
+		syscall                            # puts("\n");
 
 # Backtrace
 		la      $a0, nextline
