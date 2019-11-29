@@ -61,12 +61,12 @@ always @(*) begin
     else begin
         if (counter_r < 4'b1111) begin
             counter_w = counter_r + 1'b1;
-            vector_y_w[counter_r] = vector_y_r[counter_r] + temp;
+            vector_y_w[counter_r] = temp;
         end
         else begin
             finish_w = 1'b1;
             if (finish_r == 1'b0)
-                vector_y_w[15] = vector_y_r[15] + temp;
+                vector_y_w[15] = temp;
         end
     end
 
